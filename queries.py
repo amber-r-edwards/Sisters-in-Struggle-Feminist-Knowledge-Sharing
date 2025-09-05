@@ -318,21 +318,20 @@ if __name__ == "__main__":
 
 #!/usr/bin/env python3
 """
-Event and Source Publication Analysis in Zines Database
+Join Publications with Events in Zines Database
 History 8510 - Clemson University
 
-This script retrieves events and their source publications, even if the source publication 
-does not match any publication in the publications table. It uses a LEFT JOIN to ensure 
-all events are included.
+This script retrieves events and their associated publications, including volume and issue numbers,
+and filters rows where source_publication is not "NA".
 """
 
 import sqlite3
 import pandas as pd
 
-def analyze_events_with_source_publication():
-    """Analyze events and their source publications, even if unmatched"""
+def analyze_publications_and_events():
+    """Analyze publications and events with valid source publications"""
     
-    print("=== Event and Source Publication Analysis ===")
+    print("=== Publications and Events Analysis ===")
     print("History 8510 - Clemson University")
     print("=" * 60)
     
@@ -344,33 +343,31 @@ def analyze_events_with_source_publication():
         print(f"❌ Database connection error: {e}")
         return
     
-    # SQL query to join events and publications, including unmatched source publications
+    # SQL query to join publications and events, including volume and issue numbers
     query = """
     SELECT 
         e.event_title AS event_title,
         e.event_type AS event_type,
-        e.event_date AS event_date,
-        e.location AS location,
         e.source_publication AS source_publication,
-        p.pub_title AS publication_title,
         p.volume AS volume_number,
-        p.issue_number AS issue_number,
-        p.issue_date AS publication_date
+        p.issue_number AS issue_number
     FROM 
         events e
-    LEFT JOIN  
+    JOIN 
         publications p
     ON 
-        TRIM(LOWER(e.source_publication)) = TRIM(LOWER(p.pub_title))
-    ORDER BY 
-        e.event_date ASC;
+        e.publication_id = p.pub_id
+    WHERE 
+        e.source_publication IS NOT NULL
+        AND e.source_publication != 'NA';
     """
     
     try:
         # Execute the query and load results into a Pandas DataFrame
         df = pd.read_sql_query(query, conn)
         
-        print("\nEvents and Source Publications (Including Unmatched):")
+        # Display the data in a readable format
+        print("\nPublications and Events (Filtered by Valid Source Publications):")
         print(df.to_string(index=False))
     except sqlite3.Error as e:
         print(f"❌ Query execution error: {e}")
@@ -381,4 +378,4 @@ def analyze_events_with_source_publication():
 
 # Run the analysis
 if __name__ == "__main__":
-    analyze_events_with_source_publication()
+    analyze_publications_and_events()
