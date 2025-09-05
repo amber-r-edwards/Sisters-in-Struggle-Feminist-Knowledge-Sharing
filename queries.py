@@ -241,3 +241,73 @@ def analyze_event_types_and_totals_by_location():
 # Run the analysis
 if __name__ == "__main__":
     analyze_event_types_and_totals_by_location()
+
+# ---------------------------------------------------------------------------------------------------------
+
+#!/usr/bin/env python3
+"""
+Event Advertisement and Protest Report Analysis in Berkeley and San Francisco
+History 8510 - Clemson University
+
+This script calculates the maximum number of Event Advertisement and Protest Report 
+events in Berkeley and San Francisco for a given issue, ordered by most to least.
+"""
+
+import sqlite3
+import pandas as pd
+
+def analyze_event_advertisements_and_protests():
+    """Analyze Event Advertisement and Protest Report counts in Berkeley and San Francisco"""
+    
+    print("=== Event Advertisement and Protest Report Analysis ===")
+    print("History 8510 - Clemson University")
+    print("=" * 60)
+    
+    # Connect to zines.db database
+    try:
+        conn = sqlite3.connect('zines.db')
+        print("✓ Connected to Zines database (zines.db)")
+    except sqlite3.Error as e:
+        print(f"❌ Database connection error: {e}")
+        return
+    
+    # SQL query to join events and publications and calculate counts
+    query = """
+    SELECT 
+        p.pub_title AS publication_title,
+        p.issue_number,
+        e.city,
+        COUNT(CASE WHEN e.event_type LIKE '%Event Advertisement%' THEN 1 END) AS event_advertisements_count,
+        COUNT(CASE WHEN e.event_type LIKE '%Protest Report%' THEN 1 END) AS protest_reports_count,
+        COUNT(*) AS total_events
+    FROM 
+        events e
+    JOIN 
+        publications p
+    ON 
+        e.publication_id = p.pub_id
+    WHERE 
+        e.city IN ('Berkeley', 'San Francisco')
+        AND (e.event_type LIKE '%Event Advertisement%' OR e.event_type LIKE '%Protest Report%')
+    GROUP BY 
+        p.pub_title, p.issue_number, e.city
+    ORDER BY 
+        total_events DESC;
+    """
+    
+    try:
+        # Execute the query and load results into a Pandas DataFrame
+        df = pd.read_sql_query(query, conn)
+        
+        print("\nMaximum Number of Event Advertisements and Protest Reports by Issue:")
+        print(df.to_string(index=False))
+    except sqlite3.Error as e:
+        print(f"❌ Query execution error: {e}")
+    finally:
+        # Close the database connection
+        conn.close()
+        print("\n✓ Database connection closed.")
+
+# Run the analysis
+if __name__ == "__main__":
+    analyze_event_advertisements_and_protests()
