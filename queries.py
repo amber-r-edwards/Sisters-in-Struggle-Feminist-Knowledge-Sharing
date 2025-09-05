@@ -379,3 +379,73 @@ def analyze_publications_and_events():
 # Run the analysis
 if __name__ == "__main__":
     analyze_publications_and_events()
+
+# -------------------------------------------------------------------------------------------------------------
+
+#!/usr/bin/env python3
+"""
+Unique Location Analysis in Zines Database
+History 8510 - Clemson University
+
+This script retrieves events where the combined location (city, state, country) appears only once in the data,
+ignoring the event type.
+"""
+
+import sqlite3
+import pandas as pd
+
+def analyze_unique_event_locations():
+    """Analyze events with unique locations (city, state, country combined)"""
+    
+    print("=== Unique Location Analysis ===")
+    print("History 8510 - Clemson University")
+    print("=" * 60)
+    
+    # Connect to zines.db database
+    try:
+        conn = sqlite3.connect('zines.db')
+        print("✓ Connected to Zines database (zines.db)")
+    except sqlite3.Error as e:
+        print(f"❌ Database connection error: {e}")
+        return
+    
+    # SQL query to find events with unique locations, ignoring event type
+    query = """
+    SELECT 
+        e.event_title AS event_title,
+        e.event_date AS event_date,
+        e.city || ', ' || e.state || ', ' || e.country AS location
+    FROM 
+        events e
+    WHERE 
+        (e.city || ', ' || e.state || ', ' || e.country) IN (
+            SELECT 
+                city || ', ' || state || ', ' || country AS location
+            FROM 
+                events
+            GROUP BY 
+                city, state, country
+            HAVING 
+                COUNT(*) = 1
+        )
+    ORDER BY 
+        e.event_date ASC;
+    """
+    
+    try:
+        # Execute the query and load results into a Pandas DataFrame
+        df = pd.read_sql_query(query, conn)
+        
+        # Display the data in a readable format
+        print("\nEvents with Unique Locations (City, State, Country Combined):")
+        print(df.to_string(index=False))
+    except sqlite3.Error as e:
+        print(f"❌ Query execution error: {e}")
+    finally:
+        # Close the database connection
+        conn.close()
+        print("\n✓ Database connection closed.")
+
+# Run the analysis
+if __name__ == "__main__":
+    analyze_unique_event_locations()
