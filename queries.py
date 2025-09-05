@@ -76,7 +76,8 @@ Event Type and Date Analysis in Zines Database
 History 8510 - Clemson University
 
 This script calculates the number of each event type grouped by 
-month and year and visualizes the trends over time using a line plot.
+month and year, including handling multiple event types separated by commas.
+It visualizes the trends over time using a line plot.
 """
 
 import sqlite3
@@ -99,16 +100,13 @@ def analyze_event_types_over_time():
         print(f"❌ Database connection error: {e}")
         return
     
-    # SQL query to count the number of each event type by month and year
+    # SQL query to retrieve event types and event dates
     query = """
     SELECT 
         event_type,
-        strftime('%Y-%m', event_date) AS event_month_year,
-        COUNT(*) AS event_count
+        strftime('%Y-%m', event_date) AS event_month_year
     FROM 
         events
-    GROUP BY 
-        event_type, event_month_year
     ORDER BY 
         event_month_year ASC;
     """
@@ -117,12 +115,25 @@ def analyze_event_types_over_time():
         # Execute the query and load results into a Pandas DataFrame
         df = pd.read_sql_query(query, conn)
         
+        # Split comma-separated event types and expand the DataFrame
+        expanded_rows = []
+        for _, row in df.iterrows():
+            event_types = [etype.strip() for etype in row['event_type'].split(',')]
+            for event_type in event_types:
+                expanded_rows.append({'event_type': event_type, 'event_month_year': row['event_month_year']})
+        
+        # Create a new DataFrame with expanded rows
+        expanded_df = pd.DataFrame(expanded_rows)
+        
+        # Group by event_type and event_month_year, and count occurrences
+        grouped_df = expanded_df.groupby(['event_type', 'event_month_year']).size().reset_index(name='event_count')
+        
         # Convert event_month_year to a datetime object for better plotting
-        df['event_month_year'] = pd.to_datetime(df['event_month_year'], format='%Y-%m')
+        grouped_df['event_month_year'] = pd.to_datetime(grouped_df['event_month_year'], format='%Y-%m')
         
         # Set up the visualization
         plt.figure(figsize=(12, 6))
-        sns.lineplot(data=df, x='event_month_year', y='event_count', hue='event_type', marker='o')
+        sns.lineplot(data=grouped_df, x='event_month_year', y='event_count', hue='event_type', marker='o')
         
         # Customize the plot
         plt.title('Number of Each Event Type Over Time (Month/Year)', fontsize=16)
