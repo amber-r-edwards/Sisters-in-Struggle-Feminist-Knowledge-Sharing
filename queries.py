@@ -321,15 +321,16 @@ if __name__ == "__main__":
 Event and Source Publication Analysis in Zines Database
 History 8510 - Clemson University
 
-This script retrieves events with a non-NA source publication and joins them with 
-the publications table to show the publication details (title, volume, issue, and date).
+This script retrieves events and their source publications, even if the source publication 
+does not match any publication in the publications table. It uses a LEFT JOIN to ensure 
+all events are included.
 """
 
 import sqlite3
 import pandas as pd
 
 def analyze_events_with_source_publication():
-    """Analyze events with a source publication and their associated publication details"""
+    """Analyze events and their source publications, even if unmatched"""
     
     print("=== Event and Source Publication Analysis ===")
     print("History 8510 - Clemson University")
@@ -343,7 +344,7 @@ def analyze_events_with_source_publication():
         print(f"❌ Database connection error: {e}")
         return
     
-    # SQL query to join events and publications and filter non-NA source publications
+    # SQL query to join events and publications, including unmatched source publications
     query = """
     SELECT 
         e.event_title AS event_title,
@@ -353,28 +354,26 @@ def analyze_events_with_source_publication():
         e.city AS city,
         e.state AS state,
         e.country AS country,
-        e.description AS event_description,
+        e.source_publication AS source_publication,
         p.pub_title AS publication_title,
         p.volume AS volume_number,
         p.issue_number AS issue_number,
         p.issue_date AS publication_date
     FROM 
         events e
-    JOIN 
+    LEFT JOIN  
         publications p
     ON 
-        e.source_publication = p.pub_title
-    WHERE 
-        e.source_publication != 'NA'
+        TRIM(LOWER(e.source_publication)) = TRIM(LOWER(p.pub_title))
     ORDER BY 
-        p.issue_date ASC;
+        e.event_date ASC;
     """
     
     try:
         # Execute the query and load results into a Pandas DataFrame
         df = pd.read_sql_query(query, conn)
         
-        print("\nEvents with Source Publications and Associated Publication Details:")
+        print("\nEvents and Source Publications (Including Unmatched):")
         print(df.to_string(index=False))
     except sqlite3.Error as e:
         print(f"❌ Query execution error: {e}")
