@@ -157,3 +157,77 @@ def analyze_event_types_over_time():
 # Run the analysis
 if __name__ == "__main__":
     analyze_event_types_over_time()
+
+# ------------------------------------------------------------------------------------------------------------
+
+#!/usr/bin/env python3
+"""
+Event Type and Location Analysis in Zines Database
+History 8510 - Clemson University
+
+This script calculates the number of each event type grouped by location 
+(city, state, country), including handling multiple event types separated by commas.
+It orders the results from most to least frequent.
+"""
+
+import sqlite3
+import pandas as pd
+
+def analyze_event_types_by_location():
+    """Analyze and count the number of each event type by location"""
+    
+    print("=== Event Type and Location Analysis in Zines Database ===")
+    print("History 8510 - Clemson University")
+    print("=" * 60)
+    
+    # Connect to zines.db database
+    try:
+        conn = sqlite3.connect('zines.db')
+        print("✓ Connected to Zines database (zines.db)")
+    except sqlite3.Error as e:
+        print(f"❌ Database connection error: {e}")
+        return
+    
+    # SQL query to retrieve event types and locations
+    query = """
+    SELECT 
+        event_type,
+        city || ', ' || state || ', ' || country AS location
+    FROM 
+        events
+    ORDER BY 
+        location ASC;
+    """
+    
+    try:
+        # Execute the query and load results into a Pandas DataFrame
+        df = pd.read_sql_query(query, conn)
+        
+        # Split comma-separated event types and expand the DataFrame
+        expanded_rows = []
+        for _, row in df.iterrows():
+            event_types = [etype.strip() for etype in row['event_type'].split(',')]
+            for event_type in event_types:
+                expanded_rows.append({'event_type': event_type, 'location': row['location']})
+        
+        # Create a new DataFrame with expanded rows
+        expanded_df = pd.DataFrame(expanded_rows)
+        
+        # Group by event_type and location, and count occurrences
+        grouped_df = expanded_df.groupby(['event_type', 'location']).size().reset_index(name='event_count')
+        
+        # Sort the DataFrame by event_count in descending order
+        grouped_df = grouped_df.sort_values(by='event_count', ascending=False)
+        
+        print("\nNumber of Each Event Type by Location (Ordered by Most to Least):")
+        print(grouped_df.to_string(index=False))
+    except sqlite3.Error as e:
+        print(f"❌ Query execution error: {e}")
+    finally:
+        # Close the database connection
+        conn.close()
+        print("\n✓ Database connection closed.")
+
+# Run the analysis
+if __name__ == "__main__":
+    analyze_event_types_by_location()
