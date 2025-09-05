@@ -75,15 +75,17 @@ if __name__ == "__main__":
 Event Type and Date Analysis in Zines Database
 History 8510 - Clemson University
 
-This script calculates the average count of each event type grouped by 
-month and year, and orders the results in descending order.
+This script calculates the number of each event type grouped by 
+month and year and visualizes the trends over time using a line plot.
 """
 
 import sqlite3
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-def analyze_event_types_by_date():
-    """Analyze the average count of each event type grouped by month and year"""
+def analyze_event_types_over_time():
+    """Analyze and visualize the number of each event type over time (month/year)"""
     
     print("=== Event Type and Date Analysis in Zines Database ===")
     print("History 8510 - Clemson University")
@@ -97,26 +99,43 @@ def analyze_event_types_by_date():
         print(f"❌ Database connection error: {e}")
         return
     
-    # SQL query to calculate the average count of each event type by month and year
+    # SQL query to count the number of each event type by month and year
     query = """
     SELECT 
         event_type,
         strftime('%Y-%m', event_date) AS event_month_year,
-        COUNT(*) * 1.0 / COUNT(DISTINCT strftime('%Y-%m', event_date)) AS avg_count
+        COUNT(*) AS event_count
     FROM 
         events
     GROUP BY 
         event_type, event_month_year
     ORDER BY 
-        avg_count DESC;
+        event_month_year ASC;
     """
     
     try:
         # Execute the query and load results into a Pandas DataFrame
         df = pd.read_sql_query(query, conn)
         
-        print("\nAverage Count of Each Event Type by Month and Year (Ordered by Avg Count):")
-        print(df.to_string(index=False))
+        # Convert event_month_year to a datetime object for better plotting
+        df['event_month_year'] = pd.to_datetime(df['event_month_year'], format='%Y-%m')
+        
+        # Set up the visualization
+        plt.figure(figsize=(12, 6))
+        sns.lineplot(data=df, x='event_month_year', y='event_count', hue='event_type', marker='o')
+        
+        # Customize the plot
+        plt.title('Number of Each Event Type Over Time (Month/Year)', fontsize=16)
+        plt.xlabel('Month/Year', fontsize=12)
+        plt.ylabel('Number of Events', fontsize=12)
+        plt.legend(title='Event Type', fontsize=10)
+        plt.grid(True)
+        plt.tight_layout()
+        
+        # Show the plot
+        plt.show()
+        
+        print("\nVisualization generated successfully.")
     except sqlite3.Error as e:
         print(f"❌ Query execution error: {e}")
     finally:
@@ -126,4 +145,4 @@ def analyze_event_types_by_date():
 
 # Run the analysis
 if __name__ == "__main__":
-    analyze_event_types_by_date()
+    analyze_event_types_over_time()
