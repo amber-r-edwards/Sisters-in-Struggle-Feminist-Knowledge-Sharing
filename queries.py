@@ -6,7 +6,8 @@ History 8510 - Clemson University
 This script answers the question: What is the total count of each event type 
 across all publications in the zines.db database?
 
-Uses a simple SQL query to analyze event type distribution.
+Handles events with multiple types (comma-separated) by splitting them and 
+attributing each type to its respective total count.
 """
 
 import sqlite3
@@ -27,24 +28,35 @@ def analyze_event_types():
         print(f"❌ Database connection error: {e}")
         return
     
-    # SQL query to count event types
+    # SQL query to retrieve all event types
     query = """
     SELECT 
-        event_type,
-        COUNT(event_type) AS total_count
+        event_type
     FROM 
         events
-    GROUP BY 
-        event_type
-    ORDER BY 
-        total_count DESC;
     """
     
     try:
         # Execute the query and load results into a Pandas DataFrame
         df = pd.read_sql_query(query, conn)
+        
+        # Split comma-separated event types and count each type
+        event_counts = {}
+        for event_type_list in df['event_type']:
+            # Split the event_type string by commas and strip whitespace
+            event_types = [etype.strip() for etype in event_type_list.split(',')]
+            for event_type in event_types:
+                if event_type in event_counts:
+                    event_counts[event_type] += 1
+                else:
+                    event_counts[event_type] = 1
+        
+        # Convert the event_counts dictionary to a DataFrame for display
+        result_df = pd.DataFrame(list(event_counts.items()), columns=['event_type', 'total_count'])
+        result_df = result_df.sort_values(by='total_count', ascending=False)
+        
         print("\nEvent Type Counts Across All Publications:")
-        print(df.to_string(index=False))
+        print(result_df.to_string(index=False))
     except sqlite3.Error as e:
         print(f"❌ Query execution error: {e}")
     finally:
