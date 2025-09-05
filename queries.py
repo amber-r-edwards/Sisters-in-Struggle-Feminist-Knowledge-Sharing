@@ -250,7 +250,8 @@ Event Advertisement and Protest Report Analysis in Berkeley and San Francisco
 History 8510 - Clemson University
 
 This script calculates the maximum number of Event Advertisement and Protest Report 
-events in Berkeley and San Francisco for a given issue, ordered by most to least.
+events in Berkeley and San Francisco for a given issue, grouped by volume and issue number,
+and ordered by volume and issue number in ascending order.
 """
 
 import sqlite3
@@ -275,7 +276,8 @@ def analyze_event_advertisements_and_protests():
     query = """
     SELECT 
         p.pub_title AS publication_title,
-        p.issue_number,
+        p.volume AS volume_number,
+        p.issue_number AS issue_number,
         e.city,
         COUNT(CASE WHEN e.event_type LIKE '%Event Advertisement%' THEN 1 END) AS event_advertisements_count,
         COUNT(CASE WHEN e.event_type LIKE '%Protest Report%' THEN 1 END) AS protest_reports_count,
@@ -290,16 +292,16 @@ def analyze_event_advertisements_and_protests():
         e.city IN ('Berkeley', 'San Francisco')
         AND (e.event_type LIKE '%Event Advertisement%' OR e.event_type LIKE '%Protest Report%')
     GROUP BY 
-        p.pub_title, p.issue_number, e.city
+        p.pub_title, p.volume, p.issue_number, e.city
     ORDER BY 
-        total_events DESC;
+        p.volume ASC, p.issue_number ASC;
     """
     
     try:
         # Execute the query and load results into a Pandas DataFrame
         df = pd.read_sql_query(query, conn)
         
-        print("\nMaximum Number of Event Advertisements and Protest Reports by Issue:")
+        print("\nMaximum Number of Event Advertisements and Protest Reports by Volume and Issue:")
         print(df.to_string(index=False))
     except sqlite3.Error as e:
         print(f"❌ Query execution error: {e}")
