@@ -165,16 +165,18 @@ if __name__ == "__main__":
 Event Type and Location Analysis in Zines Database
 History 8510 - Clemson University
 
-This script calculates the number of each event type grouped by location 
-(city, state, country), including handling multiple event types separated by commas.
-It orders the results from most to least frequent.
+This script calculates:
+1. The number of each event type grouped by location (city, state, country).
+2. The total number of events grouped by location.
+
+It handles multiple event types separated by commas and orders the results from most to least frequent.
 """
 
 import sqlite3
 import pandas as pd
 
-def analyze_event_types_by_location():
-    """Analyze and count the number of each event type by location"""
+def analyze_event_types_and_totals_by_location():
+    """Analyze the number of each event type and total events grouped by location"""
     
     print("=== Event Type and Location Analysis in Zines Database ===")
     print("History 8510 - Clemson University")
@@ -214,13 +216,21 @@ def analyze_event_types_by_location():
         expanded_df = pd.DataFrame(expanded_rows)
         
         # Group by event_type and location, and count occurrences
-        grouped_df = expanded_df.groupby(['event_type', 'location']).size().reset_index(name='event_count')
+        event_type_counts = expanded_df.groupby(['event_type', 'location']).size().reset_index(name='event_count')
         
-        # Sort the DataFrame by event_count in descending order
-        grouped_df = grouped_df.sort_values(by='event_count', ascending=False)
+        # Group by location only, and count total events
+        total_event_counts = expanded_df.groupby(['location']).size().reset_index(name='total_event_count')
         
+        # Sort both DataFrames by their counts in descending order
+        event_type_counts = event_type_counts.sort_values(by='event_count', ascending=False)
+        total_event_counts = total_event_counts.sort_values(by='total_event_count', ascending=False)
+        
+        # Display the results
         print("\nNumber of Each Event Type by Location (Ordered by Most to Least):")
-        print(grouped_df.to_string(index=False))
+        print(event_type_counts.to_string(index=False))
+        
+        print("\nTotal Number of Events by Location (Ordered by Most to Least):")
+        print(total_event_counts.to_string(index=False))
     except sqlite3.Error as e:
         print(f"❌ Query execution error: {e}")
     finally:
@@ -230,4 +240,4 @@ def analyze_event_types_by_location():
 
 # Run the analysis
 if __name__ == "__main__":
-    analyze_event_types_by_location()
+    analyze_event_types_and_totals_by_location()
