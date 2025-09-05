@@ -455,3 +455,82 @@ def analyze_unique_event_locations_with_publications():
 # Run the analysis
 if __name__ == "__main__":
     analyze_unique_event_locations_with_publications()
+
+# --------------------------------------------------------------------------------------------------
+
+#!/usr/bin/env python3
+"""
+Unique Non-USA Location and Publication Analysis in Zines Database
+History 8510 - Clemson University
+
+This script retrieves events where the combined location (city, state, country) appears only once in the data,
+filters for events outside the USA, and joins with the publications table to include volume and issue numbers.
+"""
+
+import sqlite3
+import pandas as pd
+
+def analyze_unique_non_usa_event_locations_with_publications():
+    """Analyze events with unique non-USA locations (city, state, country combined) and include publication details"""
+    
+    print("=== Unique Non-USA Location and Publication Analysis ===")
+    print("History 8510 - Clemson University")
+    print("=" * 60)
+    
+    # Connect to zines.db database
+    try:
+        conn = sqlite3.connect('zines.db')
+        print("✓ Connected to Zines database (zines.db)")
+    except sqlite3.Error as e:
+        print(f"❌ Database connection error: {e}")
+        return
+    
+    # SQL query to find events with unique non-USA locations and include publication details
+    query = """
+    SELECT 
+        e.event_title AS event_title,
+        e.event_date AS event_date,
+        e.city || ', ' || e.state || ', ' || e.country AS location,
+        p.volume AS volume_number,
+        p.issue_number AS issue_number
+    FROM 
+        events e
+    LEFT JOIN 
+        publications p
+    ON 
+        e.publication_id = p.pub_id
+    WHERE 
+        e.country != 'USA'
+        AND (e.city || ', ' || e.state || ', ' || e.country) IN (
+            SELECT 
+                city || ', ' || state || ', ' || country AS location
+            FROM 
+                events
+            WHERE 
+                country != 'USA'
+            GROUP BY 
+                city, state, country
+            HAVING 
+                COUNT(*) = 1
+        )
+    ORDER BY 
+        e.event_date ASC;
+    """
+    
+    try:
+        # Execute the query and load results into a Pandas DataFrame
+        df = pd.read_sql_query(query, conn)
+        
+        # Display the data in a readable format
+        print("\nEvents with Unique Non-USA Locations and Publication Details:")
+        print(df.to_string(index=False))
+    except sqlite3.Error as e:
+        print(f"❌ Query execution error: {e}")
+    finally:
+        # Close the database connection
+        conn.close()
+        print("\n✓ Database connection closed.")
+
+# Run the analysis
+if __name__ == "__main__":
+    analyze_unique_non_usa_event_locations_with_publications()
