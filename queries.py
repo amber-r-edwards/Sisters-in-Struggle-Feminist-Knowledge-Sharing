@@ -384,20 +384,20 @@ if __name__ == "__main__":
 
 #!/usr/bin/env python3
 """
-Unique Location Analysis in Zines Database
+Unique Location and Publication Analysis in Zines Database
 History 8510 - Clemson University
 
 This script retrieves events where the combined location (city, state, country) appears only once in the data,
-ignoring the event type.
+and joins with the publications table to include volume and issue numbers.
 """
 
 import sqlite3
 import pandas as pd
 
-def analyze_unique_event_locations():
-    """Analyze events with unique locations (city, state, country combined)"""
+def analyze_unique_event_locations_with_publications():
+    """Analyze events with unique locations (city, state, country combined) and include publication details"""
     
-    print("=== Unique Location Analysis ===")
+    print("=== Unique Location and Publication Analysis ===")
     print("History 8510 - Clemson University")
     print("=" * 60)
     
@@ -409,14 +409,20 @@ def analyze_unique_event_locations():
         print(f"❌ Database connection error: {e}")
         return
     
-    # SQL query to find events with unique locations, ignoring event type
+    # SQL query to find events with unique locations and include publication details
     query = """
     SELECT 
         e.event_title AS event_title,
         e.event_date AS event_date,
-        e.city || ', ' || e.state || ', ' || e.country AS location
+        e.city || ', ' || e.state || ', ' || e.country AS location,
+        p.volume AS volume_number,
+        p.issue_number AS issue_number
     FROM 
         events e
+    LEFT JOIN 
+        publications p
+    ON 
+        e.publication_id = p.pub_id
     WHERE 
         (e.city || ', ' || e.state || ', ' || e.country) IN (
             SELECT 
@@ -437,7 +443,7 @@ def analyze_unique_event_locations():
         df = pd.read_sql_query(query, conn)
         
         # Display the data in a readable format
-        print("\nEvents with Unique Locations (City, State, Country Combined):")
+        print("\nEvents with Unique Locations and Publication Details:")
         print(df.to_string(index=False))
     except sqlite3.Error as e:
         print(f"❌ Query execution error: {e}")
@@ -448,4 +454,4 @@ def analyze_unique_event_locations():
 
 # Run the analysis
 if __name__ == "__main__":
-    analyze_unique_event_locations()
+    analyze_unique_event_locations_with_publications()
