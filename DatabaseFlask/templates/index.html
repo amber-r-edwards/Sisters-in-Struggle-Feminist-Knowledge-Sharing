@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Sisters in Struggle: Feminist Knoweldge Sharing - Events{% endblock %}
+
+{% block content %}
+<h1>Events</h1>
+
+{% for event in events %}
+<div class="event-card">
+    <div class="event-title">{{ event.event_title }}</div>
+    {% if event.event_date %}
+    <div class="event-info"><strong>Date:</strong> {{ event.event_date }}</div>
+    {% endif %}
+    {% if event.publication_title %}
+    <div class="event-info"><strong>Publication:</strong> {{ event.publication_title }}</div>
+    {% endif %}
+    {% if event.volume_number %}
+    <div class="event-info"><strong>Volume:</strong> {{ event.volume_number }}</div>
+    {% endif %}
+    {% if event.issue_number %}
+    <div class="event-info"><strong>Issue:</strong> {{ event.issue_number }}</div>
+    {% endif %}
+    <div class="event-info"><strong>Location:</strong> {{ event.city }}, {{ event.state }}, {{ event.country }}</div>
+</div>
+{% endfor %}
+
+{% endblock %}
