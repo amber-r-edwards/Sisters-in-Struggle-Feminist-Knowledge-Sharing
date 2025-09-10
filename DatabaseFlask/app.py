@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
 import os
 
@@ -66,6 +66,72 @@ def index():
     # Render the HTML template and pass the events data to it
     # The template can access the 'events' variable
     return render_template('index.html', events=events)
+
+@app.route('/add_publication', methods=['GET', 'POST'])
+def add_publication():
+    """
+    Add new publication route - handles both displaying form and processing submission
+    
+    GET: Shows the form to add a new publication
+    POST: Processes the form data and adds publication to the database
+    
+    Returns:
+        HTML page: Either the form (GET) or redirect to home page (POST)
+    """
+    if request.method == 'POST':
+        # Handle form submission
+        return handle_publication_submission()
+    else:
+        # Display the form
+        return show_publication_form()
+
+def show_publication_form():
+    """
+    Display the form for adding a new publication
+    
+    Returns:
+        HTML page: The publication form
+    """
+    return render_template('add_publication.html')
+
+def handle_publication_submission():
+    """
+    Process the form data and add new publication to the database
+    
+    Returns:
+        Redirect: To home page with success/error message
+    """
+    # Get form data
+    pub_title = request.form.get('pub_title', '').strip()
+    volume = request.form.get('volume', '').strip()
+    issue_number = request.form.get('issue_number', '').strip()
+    
+    # Basic validation
+    if not pub_title:
+        flash('Publication title is required!', 'error')
+        return redirect(url_for('add_publication'))
+    
+    try:
+        conn = get_db_connection()
+        
+        # Insert the new publication
+        conn.execute('''
+            INSERT INTO publications (pub_title, volume, issue_number)
+            VALUES (?, ?, ?)
+        ''', (pub_title, volume, issue_number))
+        
+        # Commit the changes
+        conn.commit()
+        conn.close()
+        
+        # Success message
+        flash(f'Successfully added publication: {pub_title}', 'success')
+        
+    except Exception as e:
+        flash(f'Error adding publication: {str(e)}', 'error')
+    
+    # Redirect back to home page
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     # Start the Flask development server

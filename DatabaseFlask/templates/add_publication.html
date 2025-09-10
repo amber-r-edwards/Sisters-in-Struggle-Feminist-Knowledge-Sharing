@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Add Publication{% endblock %}
+
+{% block content %}
+<h1>Add a New Publication</h1>
+
+<form method="POST" action="{{ url_for('add_publication') }}">
+    <div>
+        <label for="pub_title">Publication Title:</label>
+        <input type="text" id="pub_title" name="pub_title" required>
+    </div>
+    <div>
+        <label for="volume">Volume:</label>
+        <input type="text" id="volume" name="volume">
+    </div>
+    <div>
+        <label for="issue_number">Issue Number:</label>
+        <input type="text" id="issue_number" name="issue_number">
+    </div>
+    <div>
+        <button type="submit">Add Publication</button>
+    </div>
+</form>
+{% endblock %}
