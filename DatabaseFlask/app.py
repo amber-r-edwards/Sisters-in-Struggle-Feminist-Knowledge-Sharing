@@ -133,6 +133,75 @@ def handle_publication_submission():
     # Redirect back to home page
     return redirect(url_for('index'))
 
+@app.route('/add_event', methods=['GET', 'POST'])
+def add_event():
+    """
+    Add new event route - handles both displaying form and processing submission
+    
+    GET: Shows the form to add a new event
+    POST: Processes the form data and adds event to the database
+    
+    Returns:
+        HTML page: Either the form (GET) or redirect to home page (POST)
+    """
+    if request.method == 'POST':
+        # Handle form submission
+        return handle_event_submission()
+    else:
+        # Display the form
+        return show_event_form()
+
+def show_event_form():
+    """
+    Display the form for adding a new event
+    
+    Returns:
+        HTML page: The event form
+    """
+    return render_template('add_event.html')
+
+def handle_event_submission():
+    """
+    Process the form data and add new event to the database
+    
+    Returns:
+        Redirect: To home page with success/error message
+    """
+    # Get form data
+    event_title = request.form.get('event_title', '').strip()
+    event_date = request.form.get('event_date', '').strip()
+    city = request.form.get('city', '').strip()
+    state = request.form.get('state', '').strip()
+    country = request.form.get('country', '').strip()
+    publication_id = request.form.get('publication_id', '').strip()
+    
+    # Basic validation
+    if not event_title:
+        flash('Event title is required!', 'error')
+        return redirect(url_for('add_event'))
+    
+    try:
+        conn = get_db_connection()
+        
+        # Insert the new event
+        conn.execute('''
+            INSERT INTO events (event_title, event_date, city, state, country, publication_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (event_title, event_date, city, state, country, publication_id))
+        
+        # Commit the changes
+        conn.commit()
+        conn.close()
+        
+        # Success message
+        flash(f'Successfully added event: {event_title}', 'success')
+        
+    except Exception as e:
+        flash(f'Error adding event: {str(e)}', 'error')
+    
+    # Redirect back to home page
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
     # Start the Flask development server
     # Parameters explained:
@@ -140,3 +209,4 @@ if __name__ == '__main__':
     # - host='0.0.0.0': Makes the server accessible from any IP address
     # - port=5000: Runs on port 5000
     app.run(debug=True, host='0.0.0.0', port=5001)
+

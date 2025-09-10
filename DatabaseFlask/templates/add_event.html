@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Add Event{% endblock %}
+
+{% block content %}
+<h1>Add a New Event</h1>
+
+<form method="POST" action="{{ url_for('add_event') }}">
+    <div>
+        <label for="event_title">Event Title:</label>
+        <input type="text" id="event_title" name="event_title" required>
+    </div>
+    <div>
+        <label for="event_date">Event Date:</label>
+        <input type="date" id="event_date" name="event_date">
+    </div>
+    <div>
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city">
+    </div>
+    <div>
+        <label for="state">State:</label>
+        <input type="text" id="state" name="state">
+    </div>
+    <div>
+        <label for="country">Country:</label>
+        <input type="text" id="country" name="country">
+    </div>
+    <div>
+        <label for="publication_id">Publication ID:</label>
+        <input type="number" id="publication_id" name="publication_id">
+    </div>
+    <div>
+        <button type="submit">Add Event</button>
+    </div>
+</form>
+{% endblock %}
