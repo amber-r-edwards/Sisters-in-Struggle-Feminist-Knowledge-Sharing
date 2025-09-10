@@ -11,14 +11,11 @@
     {% if event.event_date %}
     <div class="event-info"><strong>Date:</strong> {{ event.event_date }}</div>
     {% endif %}
+    {% if event.event_type %}
+    <div class="event-info"><strong>Type:</strong> {{ event.event_type }}</div>
+    {% endif %}
     {% if event.publication_title %}
     <div class="event-info"><strong>Publication:</strong> {{ event.publication_title }}</div>
-    {% endif %}
-    {% if event.volume_number %}
-    <div class="event-info"><strong>Volume:</strong> {{ event.volume_number }}</div>
-    {% endif %}
-    {% if event.issue_number %}
-    <div class="event-info"><strong>Issue:</strong> {{ event.issue_number }}</div>
     {% endif %}
     <div class="event-info"><strong>Location:</strong> {{ event.city }}, {{ event.state }}, {{ event.country }}</div>
 </div>

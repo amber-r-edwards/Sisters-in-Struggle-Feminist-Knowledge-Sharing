@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
 import os
+import secrets 
 
 # Initialize the Flask application
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)  # Generates a 32-character random key
 
 # Path to the SQLite database file
 DB_PATH = '../zines.db'  # Back one folder and just the name
@@ -35,7 +37,7 @@ def index():
     
     What this function does:
     1. Connects to the database
-    2. Runs a SQL query to get event information
+    2. Runs a SQL query to get event information, including event type
     3. Closes the database connection
     4. Renders an HTML template with the data
     
@@ -45,14 +47,9 @@ def index():
     # Get a connection to our database
     conn = get_db_connection()
     
-    # Execute a SQL query to get event data
-    # This query:
-    # - SELECTs all columns from events (e) and publication details from publications (p)
-    # - JOINs the events and publications tables on publication_id
-    # - FILTERs out events with empty or null titles
-    # - LIMITs results to 10 events
+    # Execute a SQL query to get event data, including event type
     events = conn.execute('''
-        SELECT e.event_title, e.event_date, e.city, e.state, e.country,
+        SELECT e.event_title, e.event_date, e.city, e.state, e.country, e.event_type,
                p.pub_title AS publication_title, p.volume AS volume_number, 
                p.issue_number AS issue_number
         FROM events e
