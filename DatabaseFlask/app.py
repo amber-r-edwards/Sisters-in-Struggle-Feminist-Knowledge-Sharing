@@ -58,7 +58,6 @@ def index():
         FROM events e
         LEFT JOIN publications p ON e.publication_id = p.pub_id
         WHERE e.event_title IS NOT NULL AND e.event_title != ''
-        LIMIT 10
     ''').fetchall()  # fetchall() gets all the results as a list of Row objects
     
     # Always close database connections when done
