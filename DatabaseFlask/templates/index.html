@@ -5,16 +5,34 @@
 {% block content %}
 <h1>Events</h1>
 
+<!-- Search and Filter Form -->
+<form method="GET" action="{{ url_for('index') }}">
+    <input type="text" name="search" placeholder="Search events..." value="{{ search }}">
+    <input type="text" name="city" placeholder="Search city..." value="{{ city_filter }}">
+    <input type="text" name="state" placeholder="Search state..." value="{{ state_filter }}">
+    <select name="event_type">
+        <option value="">All Types</option>
+        <option value="Call to Action" {% if event_type_filter == "Call to Action" %}selected{% endif %}>Call to Action</option>
+        <option value="Courses" {% if event_type_filter == "Courses" %}selected{% endif %}>Courses</option>
+        <option value="Direct Advocacy" {% if event_type_filter == "Direct Advocacy" %}selected{% endif %}>Direct Advocacy</option>
+        <option value="Event Advertisement" {% if event_type_filter == "Event Advertisement" %}selected{% endif %}>Event Advertisement</option>
+        <option value="Meeting Advertisement" {% if event_type_filter == "Meeting Advertisement" %}selected{% endif %}>Meeting Advertisement</option>
+        <option value="Meeting Report" {% if event_type_filter == "Meeting Report" %}selected{% endif %}>Meeting Report</option>
+        <option value="Oppression Report" {% if event_type_filter == "Oppression Report" %}selected{% endif %}>Oppression Report</option>
+        <option value="Protest Report" {% if event_type_filter == "Protest Report" %}selected{% endif %}>Protest Report</option>
+    </select>
+    <button type="submit">Search</button>
+</form>
+
 <!-- Events Table -->
 <table border="1" cellpadding="10" cellspacing="0">
     <thead>
         <tr>
-            <th>Title</th>
-            <th>Date</th>
-            <th>City</th>
-            <th>State</th>
-            <th>Country</th>
-            <th>Type</th>
+            <th><a href="{{ url_for('index', sort='event_title', order='asc' if order == 'desc' else 'desc') }}">Title</a></th>
+            <th><a href="{{ url_for('index', sort='event_date', order='asc' if order == 'desc' else 'desc') }}">Date</a></th>
+            <th><a href="{{ url_for('index', sort='city', order='asc' if order == 'desc' else 'desc') }}">City</a></th>
+            <th><a href="{{ url_for('index', sort='state', order='asc' if order == 'desc' else 'desc') }}">State</a></th>
+            <th><a href="{{ url_for('index', sort='event_type', order='asc' if order == 'desc' else 'desc') }}">Type</a></th>
             <th>Publication</th>
         </tr>
     </thead>
@@ -25,7 +43,6 @@
             <td>{{ event.event_date }}</td>
             <td>{{ event.city }}</td>
             <td>{{ event.state }}</td>
-            <td>{{ event.country }}</td>
             <td>{{ event.event_type }}</td>
             <td>{{ event.publication_title }}</td>
         </tr>
@@ -36,11 +53,11 @@
 <!-- Pagination Links -->
 <div class="pagination">
     {% if page > 1 %}
-    <a href="{{ url_for('index', page=page-1) }}">Previous</a>
+    <a href="{{ url_for('index', page=page-1, search=search, sort=sort, order=order, city=city_filter, state=state_filter, event_type=event_type_filter) }}">Previous</a>
     {% endif %}
     <span>Page {{ page }} of {{ total_pages }}</span>
     {% if page < total_pages %}
-    <a href="{{ url_for('index', page=page+1) }}">Next</a>
+    <a href="{{ url_for('index', page=page+1, search=search, sort=sort, order=order, city=city_filter, state=state_filter, event_type=event_type_filter) }}">Next</a>
     {% endif %}
 </div>
 {% endblock %}
