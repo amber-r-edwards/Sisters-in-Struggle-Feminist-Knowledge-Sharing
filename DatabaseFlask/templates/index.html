@@ -4,23 +4,59 @@
 
 {% block content %}
 <!-- Navigation Links -->
-<div class="navigation">
-    <a href="{{ url_for('add_event') }}" class="btn">Add Event</a>
-    <a href="{{ url_for('add_publication') }}" class="btn">Add Publication</a>
+<div class="d-flex justify-content-between mb-4">
+    <a href="{{ url_for('add_event') }}" class="btn btn-primary">Add Event</a>
+    <a href="{{ url_for('add_publication') }}" class="btn btn-secondary">Add Publication</a>
 </div>
 
-<h1>Events</h1>
+<!-- Events Section -->
+<h1 class="mb-4">Events</h1>
+
+<!-- Search and Filter Form for Events -->
+<form method="GET" action="{{ url_for('index') }}" class="mb-4">
+    <div class="row g-3">
+        <div class="col-md-3">
+            <input type="text" name="search" class="form-control" placeholder="Search events..." value="{{ search }}">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="city" class="form-control" placeholder="City" value="{{ request.args.get('city', '') }}">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="state" class="form-control" placeholder="State" value="{{ request.args.get('state', '') }}">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="country" class="form-control" placeholder="Country" value="{{ request.args.get('country', '') }}">
+        </div>
+        <div class="col-md-3">
+            <select name="event_type" class="form-select">
+                <option value="">All Types</option>
+                <option value="Call to Action" {% if request.args.get('event_type') == "Call to Action" %}selected{% endif %}>Call to Action</option>
+                <option value="Courses" {% if request.args.get('event_type') == "Courses" %}selected{% endif %}>Courses</option>
+                <option value="Direct Advocacy" {% if request.args.get('event_type') == "Direct Advocacy" %}selected{% endif %}>Direct Advocacy</option>
+                <option value="Event Advertisement" {% if request.args.get('event_type') == "Event Advertisement" %}selected{% endif %}>Event Advertisement</option>
+                <option value="Meeting Advertisement" {% if request.args.get('event_type') == "Meeting Advertisement" %}selected{% endif %}>Meeting Advertisement</option>
+                <option value="Meeting Report" {% if request.args.get('event_type') == "Meeting Report" %}selected{% endif %}>Meeting Report</option>
+                <option value="Oppression Report" {% if request.args.get('event_type') == "Oppression Report" %}selected{% endif %}>Oppression Report</option>
+                <option value="Protest Report" {% if request.args.get('event_type') == "Protest Report" %}selected{% endif %}>Protest Report</option>
+            </select>
+        </div>
+    </div>
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Reset</a>
+    </div>
+</form>
 
 <!-- Events Table -->
-<table border="1" cellpadding="10" cellspacing="0">
-    <thead>
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
         <tr>
-            <th><a href="{{ url_for('index', sort_events='event_title', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">Title</a></th>
-            <th><a href="{{ url_for('index', sort_events='event_date', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">Date</a></th>
-            <th><a href="{{ url_for('index', sort_events='city', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">City</a></th>
-            <th><a href="{{ url_for('index', sort_events='state', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">State</a></th>
-            <th><a href="{{ url_for('index', sort_events='country', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">Country</a></th>
-            <th><a href="{{ url_for('index', sort_events='event_type', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">Type</a></th>
+            <th><a href="{{ url_for('index', sort_events='event_title', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}" class="text-white">Title</a></th>
+            <th><a href="{{ url_for('index', sort_events='event_date', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}" class="text-white">Date</a></th>
+            <th><a href="{{ url_for('index', sort_events='city', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}" class="text-white">City</a></th>
+            <th><a href="{{ url_for('index', sort_events='state', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}" class="text-white">State</a></th>
+            <th><a href="{{ url_for('index', sort_events='country', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}" class="text-white">Country</a></th>
+            <th><a href="{{ url_for('index', sort_events='event_type', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}" class="text-white">Type</a></th>
             <th>Publication</th>
             <th>Actions</th>
         </tr>
@@ -36,7 +72,7 @@
             <td>{{ event.event_type }}</td>
             <td>{{ event.publication_title }}</td>
             <td>
-                <a href="{{ url_for('edit_record', record_type='event', record_id=event.event_id) }}" class="btn">Edit</a>
+                <a href="{{ url_for('edit_record', record_type='event', record_id=event.event_id) }}" class="btn btn-sm btn-warning">Edit</a>
             </td>
         </tr>
         {% endfor %}
@@ -44,28 +80,37 @@
 </table>
 
 <!-- Events Pagination -->
-<div class="pagination">
-    {% if page_events > 1 %}
-    <a href="{{ url_for('index', page_events=page_events-1, sort_events=sort_events, order_events=order_events) }}">Previous</a>
-    {% endif %}
-    <span>Page {{ page_events }} of {{ total_pages_events }}</span>
-    {% if page_events < total_pages_events %}
-    <a href="{{ url_for('index', page_events=page_events+1, sort_events=sort_events, order_events=order_events) }}">Next</a>
-    {% endif %}
-</div>
+<nav>
+    <ul class="pagination">
+        {% if page_events > 1 %}
+        <li class="page-item">
+            <a href="{{ url_for('index', page_events=page_events-1, sort_events=sort_events, order_events=order_events) }}" class="page-link">Previous</a>
+        </li>
+        {% endif %}
+        <li class="page-item disabled">
+            <span class="page-link">Page {{ page_events }} of {{ total_pages_events }}</span>
+        </li>
+        {% if page_events < total_pages_events %}
+        <li class="page-item">
+            <a href="{{ url_for('index', page_events=page_events+1, sort_events=sort_events, order_events=order_events) }}" class="page-link">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
 
-<h1>Publications</h1>
+<!-- Publications Section -->
+<h1 class="mt-5 mb-4">Publications</h1>
 
 <!-- Publications Table -->
-<table border="1" cellpadding="10" cellspacing="0">
-    <thead>
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
         <tr>
-            <th><a href="{{ url_for('index', sort_publications='pub_title', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Title</a></th>
-            <th><a href="{{ url_for('index', sort_publications='volume', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Volume</a></th>
-            <th><a href="{{ url_for('index', sort_publications='issue_number', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Issue Number</a></th>
-            <th><a href="{{ url_for('index', sort_publications='issue_date', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Issue Date</a></th>
-            <th><a href="{{ url_for('index', sort_publications='author_org', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Author/Organization</a></th>
-            <th><a href="{{ url_for('index', sort_publications='location', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Location</a></th>
+            <th>Title</th>
+            <th>Volume</th>
+            <th>Issue Number</th>
+            <th>Issue Date</th>
+            <th>Author/Organization</th>
+            <th>Location</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -79,7 +124,7 @@
             <td>{{ publication.author_org }}</td>
             <td>{{ publication.location }}</td>
             <td>
-                <a href="{{ url_for('edit_record', record_type='publication', record_id=publication.pub_id) }}" class="btn">Edit</a>
+                <a href="{{ url_for('edit_record', record_type='publication', record_id=publication.pub_id) }}" class="btn btn-sm btn-warning">Edit</a>
             </td>
         </tr>
         {% endfor %}
@@ -87,13 +132,21 @@
 </table>
 
 <!-- Publications Pagination -->
-<div class="pagination">
-    {% if page_publications > 1 %}
-    <a href="{{ url_for('index', page_publications=page_publications-1, sort_publications=sort_publications, order_publications=order_publications) }}">Previous</a>
-    {% endif %}
-    <span>Page {{ page_publications }} of {{ total_pages_publications }}</span>
-    {% if page_publications < total_pages_publications %}
-    <a href="{{ url_for('index', page_publications=page_publications+1, sort_publications=sort_publications, order_publications=order_publications) }}">Next</a>
-    {% endif %}
-</div>
+<nav>
+    <ul class="pagination">
+        {% if page_publications > 1 %}
+        <li class="page-item">
+            <a href="{{ url_for('index', page_publications=page_publications-1, sort_publications=sort_publications, order_publications=order_publications) }}" class="page-link">Previous</a>
+        </li>
+        {% endif %}
+        <li class="page-item disabled">
+            <span class="page-link">Page {{ page_publications }} of {{ total_pages_publications }}</span>
+        </li>
+        {% if page_publications < total_pages_publications %}
+        <li class="page-item">
+            <a href="{{ url_for('index', page_publications=page_publications+1, sort_publications=sort_publications, order_publications=order_publications) }}" class="page-link">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
 {% endblock %}
