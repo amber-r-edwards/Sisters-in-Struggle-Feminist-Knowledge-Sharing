@@ -41,6 +41,7 @@ def recreate_resources_table():
 def import_csv_to_resources():
     """
     Import data from the CSV file into the 'resources' table.
+    Handles multiple resource types by splitting them into separate rows.
     """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -49,22 +50,27 @@ def import_csv_to_resources():
     with open(CSV_PATH, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            cursor.execute('''
-                INSERT INTO resources (resource_title, volume, issue, resource_type, location, address, city, state, country, source_publication, description)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                row.get('resource_title', 'NA'),
-                row.get('volume', None),
-                row.get('issue', None),
-                row.get('resource_type', 'NA'),
-                row.get('location', 'NA'),
-                row.get('address', 'NA'),
-                row.get('city', 'NA'),
-                row.get('state', 'NA'),
-                row.get('country', 'NA'),
-                row.get('source_publication', 'NA'),
-                row.get('description', 'NA')
-            ))
+            # Split the resource_type column into multiple types (assuming comma-separated)
+            resource_types = row.get('resource_type', 'NA').split(',')
+
+            for resource_type in resource_types:
+                resource_type = resource_type.strip()  # Remove extra spaces
+                cursor.execute('''
+                    INSERT INTO resources (resource_title, volume, issue, resource_type, location, address, city, state, country, source_publication, description)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    row.get('resource_title', 'NA'),
+                    row.get('volume', None),
+                    row.get('issue', None),
+                    resource_type,
+                    row.get('location', 'NA'),
+                    row.get('address', 'NA'),
+                    row.get('city', 'NA'),
+                    row.get('state', 'NA'),
+                    row.get('country', 'NA'),
+                    row.get('source_publication', 'NA'),
+                    row.get('description', 'NA')
+                ))
     
     conn.commit()
     conn.close()
