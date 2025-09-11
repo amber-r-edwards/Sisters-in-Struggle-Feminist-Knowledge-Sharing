@@ -319,7 +319,7 @@ def edit_record(record_type, record_id):
             'order': request.args.get('order', 'asc'),
             'city': request.args.get('city', ''),
             'state': request.args.get('state', ''),
-            'event_type': request.args.get('event_type', ''),
+            'event_type': request.args.get('event_type', ''),  # Ensure event_type is preserved
             'country': request.args.get('country', ''),
             'page': request.args.get('page', 1)
         }
