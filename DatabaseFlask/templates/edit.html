@@ -6,7 +6,7 @@
 <h1>Edit {{ record_type | capitalize }}</h1>
 
 <form method="POST">
-    {% if record_type == 'event' %}
+        {% if record_type == 'event' %}
     <div>
         <label for="event_title">Event Title:</label>
         <input type="text" id="event_title" name="event_title" value="{{ record.event_title }}" required>
@@ -29,7 +29,16 @@
     </div>
     <div>
         <label for="event_type">Event Type:</label>
-        <input type="text" id="event_type" name="event_type" value="{{ record.event_type }}">
+        <select id="event_type" name="event_type">
+            <option value="Call to Action" {% if record.event_type == "Call to Action" %}selected{% endif %}>Call to Action</option>
+            <option value="Courses" {% if record.event_type == "Courses" %}selected{% endif %}>Courses</option>
+            <option value="Direct Advocacy" {% if record.event_type == "Direct Advocacy" %}selected{% endif %}>Direct Advocacy</option>
+            <option value="Event Advertisement" {% if record.event_type == "Event Advertisement" %}selected{% endif %}>Event Advertisement</option>
+            <option value="Meeting Advertisement" {% if record.event_type == "Meeting Advertisement" %}selected{% endif %}>Meeting Advertisement</option>
+            <option value="Meeting Report" {% if record.event_type == "Meeting Report" %}selected{% endif %}>Meeting Report</option>
+            <option value="Oppression Report" {% if record.event_type == "Oppression Report" %}selected{% endif %}>Oppression Report</option>
+            <option value="Protest Report" {% if record.event_type == "Protest Report" %}selected{% endif %}>Protest Report</option>
+        </select>
     </div>
     <div>
         <label for="description">Description:</label>

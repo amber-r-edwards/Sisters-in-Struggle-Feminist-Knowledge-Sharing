@@ -311,7 +311,19 @@ def edit_record(record_type, record_id):
             flash('Publication updated successfully!', 'success')
 
         conn.close()
-        return redirect(url_for('index'))
+
+        # Preserve query parameters and redirect back to the index page
+        query_params = {
+            'search': request.args.get('search', ''),
+            'sort': request.args.get('sort', 'event_title'),
+            'order': request.args.get('order', 'asc'),
+            'city': request.args.get('city', ''),
+            'state': request.args.get('state', ''),
+            'event_type': request.args.get('event_type', ''),
+            'country': request.args.get('country', ''),
+            'page': request.args.get('page', 1)
+        }
+        return redirect(url_for('index', **query_params))
 
     else:
         # Handle GET request to display the edit form
