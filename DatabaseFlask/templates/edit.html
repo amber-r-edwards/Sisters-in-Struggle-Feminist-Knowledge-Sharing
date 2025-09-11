@@ -6,16 +6,6 @@
 <h1>Edit {{ record_type | capitalize }}</h1>
 
 <form method="POST">
-    <!-- Hidden fields to preserve query parameters -->
-    <input type="hidden" name="search" value="{{ request.args.get('search', '') }}">
-    <input type="hidden" name="sort" value="{{ request.args.get('sort', 'event_title') }}">
-    <input type="hidden" name="order" value="{{ request.args.get('order', 'asc') }}">
-    <input type="hidden" name="city" value="{{ request.args.get('city', '') }}">
-    <input type="hidden" name="state" value="{{ request.args.get('state', '') }}">
-    <input type="hidden" name="event_type" value="{{ request.args.get('event_type', '') }}">
-    <input type="hidden" name="country" value="{{ request.args.get('country', '') }}">
-    <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
-
     {% if record_type == 'event' %}
     <div>
         <label for="event_title">Event Title:</label>

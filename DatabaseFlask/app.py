@@ -276,13 +276,13 @@ def edit_record(record_type, record_id):
     if request.method == 'POST':
         # Handle form submission to update the record
         if record_type == 'event':
-            event_title = request.form.get('event_title', '').strip()
-            event_date = request.form.get('event_date', '').strip()
-            city = request.form.get('city', '').strip()
-            state = request.form.get('state', '').strip()
-            country = request.form.get('country', '').strip()
-            event_type = request.form.get('event_type', '').strip()
-            description = request.form.get('description', '').strip()
+            event_title = request.form.get('event_title', '').strip() or 'NA'
+            event_date = request.form.get('event_date', '').strip() or 'NA'
+            city = request.form.get('city', '').strip() or 'NA'
+            state = request.form.get('state', '').strip() or 'NA'
+            country = request.form.get('country', '').strip() or 'NA'
+            event_type = request.form.get('event_type', '').strip() or 'NA'
+            description = request.form.get('description', '').strip() or 'NA'
 
             # Update the event in the database
             conn.execute('''
@@ -294,12 +294,12 @@ def edit_record(record_type, record_id):
             flash('Event updated successfully!', 'success')
 
         elif record_type == 'publication':
-            pub_title = request.form.get('pub_title', '').strip()
-            volume = request.form.get('volume', '').strip()
-            issue_number = request.form.get('issue_number', '').strip()
-            issue_date = request.form.get('issue_date', '').strip()
-            author_org = request.form.get('author_org', '').strip()
-            location = request.form.get('location', '').strip()
+            pub_title = request.form.get('pub_title', '').strip() or 'NA'
+            volume = request.form.get('volume', '').strip() or 'NA'
+            issue_number = request.form.get('issue_number', '').strip() or 'NA'
+            issue_date = request.form.get('issue_date', '').strip() or 'NA'
+            author_org = request.form.get('author_org', '').strip() or 'NA'
+            location = request.form.get('location', '').strip() or 'NA'
 
             # Update the publication in the database
             conn.execute('''
@@ -312,18 +312,8 @@ def edit_record(record_type, record_id):
 
         conn.close()
 
-        # Preserve query parameters and redirect back to the index page
-        query_params = {
-            'search': request.args.get('search', ''),
-            'sort': request.args.get('sort', 'event_title'),
-            'order': request.args.get('order', 'asc'),
-            'city': request.args.get('city', ''),
-            'state': request.args.get('state', ''),
-            'event_type': request.args.get('event_type', ''),  # Ensure event_type is preserved
-            'country': request.args.get('country', ''),
-            'page': request.args.get('page', 1)
-        }
-        return redirect(url_for('index', **query_params))
+        # Redirect back to the index page
+        return redirect(url_for('index'))
 
     else:
         # Handle GET request to display the edit form
