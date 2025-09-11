@@ -277,7 +277,7 @@ def edit_record(record_type, record_id):
         # Handle form submission to update the record
         if record_type == 'event':
             event_title = request.form.get('event_title', '').strip() or 'NA'
-            event_date = request.form.get('event_date', '').strip() or 'NA'
+            event_date = request.form.get('event_date', '').strip() or 'NA-NA-NA'
             city = request.form.get('city', '').strip() or 'NA'
             state = request.form.get('state', '').strip() or 'NA'
             country = request.form.get('country', '').strip() or 'NA'
