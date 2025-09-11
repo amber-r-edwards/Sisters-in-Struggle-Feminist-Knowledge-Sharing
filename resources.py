@@ -70,51 +70,6 @@ def import_csv_to_resources():
     conn.close()
     print("Data imported into 'resources' table successfully.")
 
-def move_courses_to_events():
-    """
-    Extract rows with resource_type 'Courses' from the 'resources' table
-    and move them into the 'events' table, filling missing columns with 'NA' or 'NA-NA-NA'.
-    """
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-
-    # Select rows with resource_type 'Courses' and join with publications
-    cursor.execute('''
-        SELECT r.resource_title, r.description, r.city, r.state, r.country, r.resource_type, p.pub_id
-        FROM resources r
-        LEFT JOIN publications p
-        ON r.volume = p.volume AND r.issue = p.issue_number
-        WHERE r.resource_type = 'Courses'
-    ''')
-    courses = cursor.fetchall()
-
-    # Move each row into the 'events' table
-    for course in courses:
-        resource_title = course[0] or 'NA'
-        description = course[1] or 'NA'
-        city = course[2] or 'NA'
-        state = course[3] or 'NA'
-        country = course[4] or 'NA'
-        event_type = course[5] or 'NA'
-        publication_id = course[6]  # This will be NULL if no match is found
-        event_date = 'NA-NA-NA'  # Default date
-
-        cursor.execute('''
-            INSERT INTO events (event_title, description, publication_id, event_date, city, state, country, event_type)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (resource_title, description, publication_id, event_date, city, state, country, event_type))
-    
-    # Delete the moved rows from the 'resources' table
-    cursor.execute('''
-        DELETE FROM resources
-        WHERE resource_type = 'Courses'
-    ''')
-
-    conn.commit()
-    conn.close()
-    print("Courses moved to 'events' table successfully.")
-
 if __name__ == '__main__':
     recreate_resources_table()
     import_csv_to_resources()
-    move_courses_to_events()
