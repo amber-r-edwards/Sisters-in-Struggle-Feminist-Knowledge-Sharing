@@ -1,5 +1,5 @@
 # Amber Edwards
-# Aug 27, 2025
+# Sept 11 2025
 # Importing CSV Data into Database
 # existing CSV of data from It Ain't Me Babe
 
@@ -28,10 +28,18 @@ try:
             # Combine year, month, and day into a single date string (YYYY-MM-DD)
             issue_date = f"{row['issue_year']}-{row['issue_month'].zfill(2)}-{row['issue_day'].zfill(2)}"
             cursor.execute('''
-                INSERT INTO publications (pub_title, volume, issue_number, issue_date, volume_title)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (row['pub_title'], row['volume'], row['issue_number'], issue_date, row['volume_title']))
-    print("✓ Data imported into publications table")
+                INSERT INTO publications (pub_title, volume, issue_number, issue_date, volume_title, author_org, location)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                row['pub_title'], 
+                row['volume'], 
+                row['issue_number'], 
+                issue_date, 
+                row['volume_title'], 
+                row['author_org'], 
+                row['location']
+            ))
+    print("✓ Imported data into the publications table")
 except Exception as e:
     print(f"Error importing data into publications table: {e}")
 
@@ -65,7 +73,7 @@ except Exception as e:
     print(f"Error importing data into events table: {e}")
 
 # Step 4: Commit changes and close the connection
-print("\nStep 4: Committing changes and closing the connection...")
+print("\nStep 4: Saving changes and closing the database connection...")
 conn.commit()
 conn.close()
-print("✓ Data import completed successfully")
+print("✓ Data imported successfully!")

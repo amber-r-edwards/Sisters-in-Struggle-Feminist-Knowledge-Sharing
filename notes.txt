@@ -1,0 +1,20 @@
+9/11/25
+Controlled Vocabulary (adapting from AintMeBabeNotes.txt)
+Events
+- Protest Report - details shared from an event of protest, organized or spontaneous
+- Meeting Advertisement - posting of a meeting's details ahead of time (including those for recurring meetings where dates may be more relative, "every tuesday" etc.)
+- Event Advertisement - posting of details for conferences, speakers, parties, gatherings, etc. ahead of time (separating from meetings)
+- Call to Action - entry that asks for protest or action which has not happened yet (may or may not have full date/location information)
+- Meeting Report - details shared for a previous meeting/gathering (minutes, notes, agreed upon statements, etc.)
+- Direct Advocacy - report of events relating to legal/political advocacy of a given individual or small group with specialized skills, rather than a group protest action (announcements of legal successes or failures that aren't quite Oppression Report either, elections, hearings, etc.)
+- Oppression Report - instances of violence, discrimination, arrest, or other actions against a given activist or group (can look different across publications)
+- Courses - formal or informal classes offered often by/for women specifically (moved from Resources)
+
+Resources
+- Reproductive Healthcare - information about doctors, councilors, and services for reproductive health
+- Plugged Publication - information about other publications (zines, books, pamphlets, etc.) often in advertisement sections 
+- Childcare Services - listings of childcare resources (day care centers, community efforts, classes catering specifically to women bringing their children, etc.)
+- Bookstores - woman owned/radical spaces of feminist expression
+- Services - advertisement of services for women/by women
+
+*eliminating Listing - if an advertisement doesn't fall into one of the categories here will consider reinstating*
