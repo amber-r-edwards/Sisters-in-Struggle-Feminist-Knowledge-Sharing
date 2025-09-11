@@ -1,24 +1,46 @@
 {% extends "base.html" %}
 
-{% block title %}Sisters in Struggle: Feminist Knoweldge Sharing - Events{% endblock %}
+{% block title %}Events{% endblock %}
 
 {% block content %}
 <h1>Events</h1>
 
-{% for event in events %}
-<div class="event-card">
-    <div class="event-title">{{ event.event_title }}</div>
-    {% if event.event_date %}
-    <div class="event-info"><strong>Date:</strong> {{ event.event_date }}</div>
-    {% endif %}
-    {% if event.event_type %}
-    <div class="event-info"><strong>Type:</strong> {{ event.event_type }}</div>
-    {% endif %}
-    {% if event.publication_title %}
-    <div class="event-info"><strong>Publication:</strong> {{ event.publication_title }}</div>
-    {% endif %}
-    <div class="event-info"><strong>Location:</strong> {{ event.city }}, {{ event.state }}, {{ event.country }}</div>
-</div>
-{% endfor %}
+<!-- Events Table -->
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Country</th>
+            <th>Type</th>
+            <th>Publication</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in events %}
+        <tr>
+            <td>{{ event.event_title }}</td>
+            <td>{{ event.event_date }}</td>
+            <td>{{ event.city }}</td>
+            <td>{{ event.state }}</td>
+            <td>{{ event.country }}</td>
+            <td>{{ event.event_type }}</td>
+            <td>{{ event.publication_title }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
+<!-- Pagination Links -->
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="{{ url_for('index', page=page-1) }}">Previous</a>
+    {% endif %}
+    <span>Page {{ page }} of {{ total_pages }}</span>
+    {% if page < total_pages %}
+    <a href="{{ url_for('index', page=page+1) }}">Next</a>
+    {% endif %}
+</div>
 {% endblock %}

@@ -30,39 +30,49 @@ def get_db_connection():
 @app.route('/')
 def index():
     """
-    Home page route - displays a list of events
+    Home page route - displays a paginated list of events in a table format.
     
     This is the main page of our web application. When someone visits
-    the root URL (http://localhost:5000/), this function runs.
+    the root URL (http://localhost:5001/), this function runs.
     
     What this function does:
     1. Connects to the database
-    2. Runs a SQL query to get event information, including event type
+    2. Runs a SQL query to get event information, including pagination
     3. Closes the database connection
     4. Renders an HTML template with the data
     
     Returns:
         HTML page: The rendered index.html template with event data
     """
+    # Get the current page number from the query parameters (default to 1)
+    page = int(request.args.get('page', 1))
+    per_page = 10  # Number of events per page
+    offset = (page - 1) * per_page  # Calculate the offset for the SQL query
+
     # Get a connection to our database
     conn = get_db_connection()
     
-    # Execute a SQL query to get event data, including event type
+    # Execute a SQL query to get event data with pagination
     events = conn.execute('''
         SELECT e.event_title, e.event_date, e.city, e.state, e.country, e.event_type,
+               e.description, e.location, e.address, e.source_publication,
                p.pub_title AS publication_title, p.volume AS volume_number, 
                p.issue_number AS issue_number
         FROM events e
         LEFT JOIN publications p ON e.publication_id = p.pub_id
         WHERE e.event_title IS NOT NULL AND e.event_title != ''
-    ''').fetchall()  # fetchall() gets all the results as a list of Row objects
-    
-    # Always close database connections when done
+        LIMIT ? OFFSET ?
+    ''', (per_page, offset)).fetchall()  # fetchall() gets all the results as a list of Row objects
+
+    # Get the total number of events for pagination
+    total_events = conn.execute('SELECT COUNT(*) FROM events').fetchone()[0]
     conn.close()
-    
-    # Render the HTML template and pass the events data to it
-    # The template can access the 'events' variable
-    return render_template('index.html', events=events)
+
+    # Calculate the total number of pages
+    total_pages = (total_events + per_page - 1) // per_page  # Round up division
+
+    # Render the HTML template and pass the events data and pagination info to it
+    return render_template('index.html', events=events, page=page, total_pages=total_pages)
 
 @app.route('/add_publication', methods=['GET', 'POST'])
 def add_publication():
