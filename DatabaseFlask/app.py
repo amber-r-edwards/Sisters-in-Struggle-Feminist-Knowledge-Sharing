@@ -47,7 +47,7 @@ def index():
 
     # Build the SQL query dynamically
     query = '''
-        SELECT e.event_title, e.event_date, e.city, e.state, e.country, e.event_type,
+        SELECT e.event_id, e.event_title, e.event_date, e.city, e.state, e.country, e.event_type,
                e.description, e.location, e.address, e.source_publication,
                p.pub_title AS publication_title, p.volume AS volume_number, 
                p.issue_number AS issue_number
@@ -253,6 +253,80 @@ def handle_event_submission():
     
     # Redirect back to home page
     return redirect(url_for('index'))
+
+@app.route('/edit/<string:record_type>/<int:record_id>', methods=['GET', 'POST'])
+def edit_record(record_type, record_id):
+    """
+    Edit page for either events or publications.
+
+    Args:
+        record_type (str): The type of record to edit ('event' or 'publication').
+        record_id (int): The ID of the record to edit.
+
+    Returns:
+        HTML page: The edit form (GET) or redirects back to the index page after saving changes (POST).
+    """
+    conn = get_db_connection()
+
+    # Check if the record type is valid
+    if record_type not in ['event', 'publication']:
+        flash('Invalid record type!', 'error')
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        # Handle form submission to update the record
+        if record_type == 'event':
+            event_title = request.form.get('event_title', '').strip()
+            event_date = request.form.get('event_date', '').strip()
+            city = request.form.get('city', '').strip()
+            state = request.form.get('state', '').strip()
+            country = request.form.get('country', '').strip()
+            event_type = request.form.get('event_type', '').strip()
+            description = request.form.get('description', '').strip()
+
+            # Update the event in the database
+            conn.execute('''
+                UPDATE events
+                SET event_title = ?, event_date = ?, city = ?, state = ?, country = ?, event_type = ?, description = ?
+                WHERE event_id = ?
+            ''', (event_title, event_date, city, state, country, event_type, description, record_id))
+            conn.commit()
+            flash('Event updated successfully!', 'success')
+
+        elif record_type == 'publication':
+            pub_title = request.form.get('pub_title', '').strip()
+            volume = request.form.get('volume', '').strip()
+            issue_number = request.form.get('issue_number', '').strip()
+            issue_date = request.form.get('issue_date', '').strip()
+            author_org = request.form.get('author_org', '').strip()
+            location = request.form.get('location', '').strip()
+
+            # Update the publication in the database
+            conn.execute('''
+                UPDATE publications
+                SET pub_title = ?, volume = ?, issue_number = ?, issue_date = ?, author_org = ?, location = ?
+                WHERE pub_id = ?
+            ''', (pub_title, volume, issue_number, issue_date, author_org, location, record_id))
+            conn.commit()
+            flash('Publication updated successfully!', 'success')
+
+        conn.close()
+        return redirect(url_for('index'))
+
+    else:
+        # Handle GET request to display the edit form
+        if record_type == 'event':
+            record = conn.execute('SELECT * FROM events WHERE event_id = ?', (record_id,)).fetchone()
+        elif record_type == 'publication':
+            record = conn.execute('SELECT * FROM publications WHERE pub_id = ?', (record_id,)).fetchone()
+
+        conn.close()
+
+        if not record:
+            flash('Record not found!', 'error')
+            return redirect(url_for('index'))
+
+        return render_template('edit.html', record=record, record_type=record_type)
 
 if __name__ == '__main__':
     # Start the Flask development server
