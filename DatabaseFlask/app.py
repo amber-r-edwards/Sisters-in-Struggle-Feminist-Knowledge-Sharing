@@ -72,6 +72,10 @@ def index():
     if event_type_filter:
         query += " AND e.event_type = ?"
         params.append(event_type_filter)
+    if request.args.get('country', '').strip():
+        country_filter = request.args.get('country', '').strip()
+        query += " AND e.country LIKE ?"
+        params.append(f"%{country_filter}%")
 
     # Add sorting functionality
     if sort in ['event_title', 'event_date', 'city', 'state', 'event_type']:

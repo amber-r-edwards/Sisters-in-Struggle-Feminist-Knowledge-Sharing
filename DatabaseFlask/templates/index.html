@@ -5,11 +5,18 @@
 {% block content %}
 <h1>Events</h1>
 
+<!-- Navigation Links -->
+<div class="navigation">
+    <a href="{{ url_for('add_event') }}" class="btn">Add Event</a>
+    <a href="{{ url_for('add_publication') }}" class="btn">Add Publication</a>
+</div>
+
 <!-- Search and Filter Form -->
 <form method="GET" action="{{ url_for('index') }}">
     <input type="text" name="search" placeholder="Search events..." value="{{ search }}">
     <input type="text" name="city" placeholder="Search city..." value="{{ city_filter }}">
     <input type="text" name="state" placeholder="Search state..." value="{{ state_filter }}">
+    <input type="text" name="country" placeholder="Search country..." value="{{ request.args.get('country', '') }}">
     <select name="event_type">
         <option value="">All Types</option>
         <option value="Call to Action" {% if event_type_filter == "Call to Action" %}selected{% endif %}>Call to Action</option>
@@ -32,6 +39,7 @@
             <th><a href="{{ url_for('index', sort='event_date', order='asc' if order == 'desc' else 'desc') }}">Date</a></th>
             <th><a href="{{ url_for('index', sort='city', order='asc' if order == 'desc' else 'desc') }}">City</a></th>
             <th><a href="{{ url_for('index', sort='state', order='asc' if order == 'desc' else 'desc') }}">State</a></th>
+            <th><a href="{{ url_for('index', sort='country', order='asc' if order == 'desc' else 'desc') }}">Country</a></th>
             <th><a href="{{ url_for('index', sort='event_type', order='asc' if order == 'desc' else 'desc') }}">Type</a></th>
             <th>Publication</th>
         </tr>
@@ -43,6 +51,7 @@
             <td>{{ event.event_date }}</td>
             <td>{{ event.city }}</td>
             <td>{{ event.state }}</td>
+            <td>{{ event.country }}</td>
             <td>{{ event.event_type }}</td>
             <td>{{ event.publication_title }}</td>
         </tr>
