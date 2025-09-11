@@ -30,93 +30,79 @@ def get_db_connection():
 @app.route('/')
 def index():
     """
-    Home page route - displays a searchable, sortable, and filterable list of events in a table format.
+    Home page route - displays paginated lists of events and publications in separate tables.
     """
-    # Get query parameters for search, sorting, and filtering
+    # Get query parameters for events
     search = request.args.get('search', '').strip()
-    sort = request.args.get('sort', 'event_title')  # Default sort by event_title
-    order = request.args.get('order', 'asc')  # Default order is ascending
-    city_filter = request.args.get('city', '').strip()
-    state_filter = request.args.get('state', '').strip()
-    event_type_filter = request.args.get('event_type', '').strip()
+    sort_events = request.args.get('sort_events', 'event_title')  # Default sort for events
+    order_events = request.args.get('order_events', 'asc')  # Default order for events
+    page_events = int(request.args.get('page_events', 1))  # Current page for events
+    per_page = 10  # Number of rows per page
+    offset_events = (page_events - 1) * per_page
 
-    # Get the current page number from the query parameters (default to 1)
-    page = int(request.args.get('page', 1))
-    per_page = 10  # Number of events per page
-    offset = (page - 1) * per_page  # Calculate the offset for the SQL query
+    # Get query parameters for publications
+    sort_publications = request.args.get('sort_publications', 'pub_title')  # Default sort for publications
+    order_publications = request.args.get('order_publications', 'asc')  # Default order for publications
+    page_publications = int(request.args.get('page_publications', 1))  # Current page for publications
+    offset_publications = (page_publications - 1) * per_page
 
-    # Build the SQL query dynamically
-    query = '''
+    # Get a connection to the database
+    conn = get_db_connection()
+
+    # Query for events with pagination
+    events_query = f'''
         SELECT e.event_id, e.event_title, e.event_date, e.city, e.state, e.country, e.event_type,
                e.description, e.location, e.address, e.source_publication,
-               p.pub_title AS publication_title, p.volume AS volume_number, 
-               p.issue_number AS issue_number
+               p.pub_title AS publication_title
         FROM events e
         LEFT JOIN publications p ON e.publication_id = p.pub_id
-        WHERE 1=1
+        WHERE e.event_title LIKE ?
+        ORDER BY {sort_events} {order_events.upper()}
+        LIMIT ? OFFSET ?
     '''
-    params = []
+    events = conn.execute(events_query, (f"%{search}%", per_page, offset_events)).fetchall()
 
-    # Add search functionality
-    if search:
-        query += " AND (e.event_title LIKE ? OR e.description LIKE ?)"
-        params.extend([f"%{search}%", f"%{search}%"])
+    # Total number of events for pagination
+    total_events_query = '''
+        SELECT COUNT(*) FROM events WHERE event_title LIKE ?
+    '''
+    total_events = conn.execute(total_events_query, (f"%{search}%",)).fetchone()[0]
 
-    # Add filtering functionality for city and state as search fields
-    if city_filter:
-        query += " AND e.city LIKE ?"
-        params.append(f"%{city_filter}%")
-    if state_filter:
-        query += " AND e.state LIKE ?"
-        params.append(f"%{state_filter}%")
-    if event_type_filter:
-        query += " AND e.event_type = ?"
-        params.append(event_type_filter)
-    if request.args.get('country', '').strip():
-        country_filter = request.args.get('country', '').strip()
-        query += " AND e.country LIKE ?"
-        params.append(f"%{country_filter}%")
+    # Query for publications with pagination
+    publications_query = f'''
+        SELECT pub_id, pub_title, volume, issue_number, issue_date, author_org, location
+        FROM publications
+        ORDER BY {sort_publications} {order_publications.upper()}
+        LIMIT ? OFFSET ?
+    '''
+    publications = conn.execute(publications_query, (per_page, offset_publications)).fetchall()
 
-    # Add sorting functionality
-    if sort in ['event_title', 'event_date', 'city', 'state', 'event_type']:
-        query += f" ORDER BY {sort} {order.upper()}"
+    # Total number of publications for pagination
+    total_publications_query = '''
+        SELECT COUNT(*) FROM publications
+    '''
+    total_publications = conn.execute(total_publications_query).fetchone()[0]
 
-    # Add pagination
-    query += " LIMIT ? OFFSET ?"
-    params.extend([per_page, offset])
-
-    # Get a connection to our database
-    conn = get_db_connection()
-    events = conn.execute(query, params).fetchall()
-
-    # Get the total number of events for pagination
-    total_query = "SELECT COUNT(*) FROM events e WHERE 1=1"
-    if search:
-        total_query += " AND (e.event_title LIKE ? OR e.description LIKE ?)"
-    if city_filter:
-        total_query += " AND e.city LIKE ?"
-    if state_filter:
-        total_query += " AND e.state LIKE ?"
-    if event_type_filter:
-        total_query += " AND e.event_type = ?"
-    total_events = conn.execute(total_query, params[:-2]).fetchone()[0]  # Exclude LIMIT and OFFSET params
     conn.close()
 
-    # Calculate the total number of pages
-    total_pages = (total_events + per_page - 1) // per_page  # Round up division
+    # Calculate total pages for events and publications
+    total_pages_events = (total_events + per_page - 1) // per_page  # Round up division
+    total_pages_publications = (total_publications + per_page - 1) // per_page
 
-    # Render the HTML template and pass the events data and pagination info to it
+    # Render the HTML template and pass the data
     return render_template(
         'index.html',
         events=events,
-        page=page,
-        total_pages=total_pages,
+        publications=publications,
+        page_events=page_events,
+        total_pages_events=total_pages_events,
+        page_publications=page_publications,
+        total_pages_publications=total_pages_publications,
         search=search,
-        sort=sort,
-        order=order,
-        city_filter=city_filter,
-        state_filter=state_filter,
-        event_type_filter=event_type_filter
+        sort_events=sort_events,
+        order_events=order_events,
+        sort_publications=sort_publications,
+        order_publications=order_publications
     )
 
 @app.route('/add_publication', methods=['GET', 'POST'])

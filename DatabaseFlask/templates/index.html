@@ -1,46 +1,26 @@
 {% extends "base.html" %}
 
-{% block title %}Events{% endblock %}
+{% block title %}Events and Publications{% endblock %}
 
 {% block content %}
-<h1>Events</h1>
-
 <!-- Navigation Links -->
 <div class="navigation">
     <a href="{{ url_for('add_event') }}" class="btn">Add Event</a>
     <a href="{{ url_for('add_publication') }}" class="btn">Add Publication</a>
 </div>
 
-<!-- Search and Filter Form -->
-<form method="GET" action="{{ url_for('index') }}">
-    <input type="text" name="search" placeholder="Search events..." value="{{ search }}">
-    <input type="text" name="city" placeholder="Search city..." value="{{ city_filter }}">
-    <input type="text" name="state" placeholder="Search state..." value="{{ state_filter }}">
-    <input type="text" name="country" placeholder="Search country..." value="{{ request.args.get('country', '') }}">
-    <select name="event_type">
-        <option value="">All Types</option>
-        <option value="Call to Action" {% if event_type_filter == "Call to Action" %}selected{% endif %}>Call to Action</option>
-        <option value="Courses" {% if event_type_filter == "Courses" %}selected{% endif %}>Courses</option>
-        <option value="Direct Advocacy" {% if event_type_filter == "Direct Advocacy" %}selected{% endif %}>Direct Advocacy</option>
-        <option value="Event Advertisement" {% if event_type_filter == "Event Advertisement" %}selected{% endif %}>Event Advertisement</option>
-        <option value="Meeting Advertisement" {% if event_type_filter == "Meeting Advertisement" %}selected{% endif %}>Meeting Advertisement</option>
-        <option value="Meeting Report" {% if event_type_filter == "Meeting Report" %}selected{% endif %}>Meeting Report</option>
-        <option value="Oppression Report" {% if event_type_filter == "Oppression Report" %}selected{% endif %}>Oppression Report</option>
-        <option value="Protest Report" {% if event_type_filter == "Protest Report" %}selected{% endif %}>Protest Report</option>
-    </select>
-    <button type="submit">Search</button>
-</form>
+<h1>Events</h1>
 
 <!-- Events Table -->
 <table border="1" cellpadding="10" cellspacing="0">
     <thead>
         <tr>
-            <th><a href="{{ url_for('index', sort='event_title', order='asc' if order == 'desc' else 'desc') }}">Title</a></th>
-            <th><a href="{{ url_for('index', sort='event_date', order='asc' if order == 'desc' else 'desc') }}">Date</a></th>
-            <th><a href="{{ url_for('index', sort='city', order='asc' if order == 'desc' else 'desc') }}">City</a></th>
-            <th><a href="{{ url_for('index', sort='state', order='asc' if order == 'desc' else 'desc') }}">State</a></th>
-            <th><a href="{{ url_for('index', sort='country', order='asc' if order == 'desc' else 'desc') }}">Country</a></th>
-            <th><a href="{{ url_for('index', sort='event_type', order='asc' if order == 'desc' else 'desc') }}">Type</a></th>
+            <th><a href="{{ url_for('index', sort_events='event_title', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">Title</a></th>
+            <th><a href="{{ url_for('index', sort_events='event_date', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">Date</a></th>
+            <th><a href="{{ url_for('index', sort_events='city', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">City</a></th>
+            <th><a href="{{ url_for('index', sort_events='state', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">State</a></th>
+            <th><a href="{{ url_for('index', sort_events='country', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">Country</a></th>
+            <th><a href="{{ url_for('index', sort_events='event_type', order_events='asc' if order_events == 'desc' else 'desc', page_events=page_events) }}">Type</a></th>
             <th>Publication</th>
             <th>Actions</th>
         </tr>
@@ -63,15 +43,57 @@
     </tbody>
 </table>
 
-
-<!-- Pagination Links -->
+<!-- Events Pagination -->
 <div class="pagination">
-    {% if page > 1 %}
-    <a href="{{ url_for('index', page=page-1, search=search, sort=sort, order=order, city=city_filter, state=state_filter, event_type=event_type_filter) }}">Previous</a>
+    {% if page_events > 1 %}
+    <a href="{{ url_for('index', page_events=page_events-1, sort_events=sort_events, order_events=order_events) }}">Previous</a>
     {% endif %}
-    <span>Page {{ page }} of {{ total_pages }}</span>
-    {% if page < total_pages %}
-    <a href="{{ url_for('index', page=page+1, search=search, sort=sort, order=order, city=city_filter, state=state_filter, event_type=event_type_filter) }}">Next</a>
+    <span>Page {{ page_events }} of {{ total_pages_events }}</span>
+    {% if page_events < total_pages_events %}
+    <a href="{{ url_for('index', page_events=page_events+1, sort_events=sort_events, order_events=order_events) }}">Next</a>
+    {% endif %}
+</div>
+
+<h1>Publications</h1>
+
+<!-- Publications Table -->
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th><a href="{{ url_for('index', sort_publications='pub_title', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Title</a></th>
+            <th><a href="{{ url_for('index', sort_publications='volume', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Volume</a></th>
+            <th><a href="{{ url_for('index', sort_publications='issue_number', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Issue Number</a></th>
+            <th><a href="{{ url_for('index', sort_publications='issue_date', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Issue Date</a></th>
+            <th><a href="{{ url_for('index', sort_publications='author_org', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Author/Organization</a></th>
+            <th><a href="{{ url_for('index', sort_publications='location', order_publications='asc' if order_publications == 'desc' else 'desc', page_publications=page_publications) }}">Location</a></th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for publication in publications %}
+        <tr>
+            <td>{{ publication.pub_title }}</td>
+            <td>{{ publication.volume }}</td>
+            <td>{{ publication.issue_number }}</td>
+            <td>{{ publication.issue_date }}</td>
+            <td>{{ publication.author_org }}</td>
+            <td>{{ publication.location }}</td>
+            <td>
+                <a href="{{ url_for('edit_record', record_type='publication', record_id=publication.pub_id) }}" class="btn">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Publications Pagination -->
+<div class="pagination">
+    {% if page_publications > 1 %}
+    <a href="{{ url_for('index', page_publications=page_publications-1, sort_publications=sort_publications, order_publications=order_publications) }}">Previous</a>
+    {% endif %}
+    <span>Page {{ page_publications }} of {{ total_pages_publications }}</span>
+    {% if page_publications < total_pages_publications %}
+    <a href="{{ url_for('index', page_publications=page_publications+1, sort_publications=sort_publications, order_publications=order_publications) }}">Next</a>
     {% endif %}
 </div>
 {% endblock %}
