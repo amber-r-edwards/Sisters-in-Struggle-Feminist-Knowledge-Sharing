@@ -29,6 +29,7 @@ def analyze_publications_and_events():
     SELECT 
         e.event_title AS event_title,
         e.event_type AS event_type,
+        e.event_date AS event_date,
         e.source_publication AS source_publication,
         p.volume AS volume_number,
         p.issue_number AS issue_number
