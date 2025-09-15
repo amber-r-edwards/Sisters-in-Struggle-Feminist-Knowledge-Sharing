@@ -16,7 +16,6 @@ def analyze_publications_and_events():
     print("=== Publications and Events Analysis ===")
     print("History 8510 - Clemson University")
     print("=" * 60)
-    
     # Connect to zines.db database
     try:
         conn = sqlite3.connect('zines.db')
