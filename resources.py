@@ -78,39 +78,23 @@ def import_csv_to_resources():
 
 def move_courses_to_events():
     """
-    Extract rows with resource_type 'Courses' from the 'resources' table
-    and move them into the 'events' table, filling missing columns with 'NA' or 'NA-NA-NA'.
+    Move all rows with resource_type 'Courses' from the 'resources' table
+    into the 'events' table, matching columns directly.
     """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # Select rows with resource_type 'Courses' and join with publications
+    # Insert rows with resource_type 'Courses' into the events table
     cursor.execute('''
-        SELECT r.resource_title, r.description, r.city, r.state, r.country, r.resource_type, p.pub_id
+        INSERT INTO events (event_title, description, publication_id, event_date, city, state, country, event_type, location, address, source_publication)
+        SELECT r.resource_title, r.description, p.pub_id, NULL, r.city, r.state, r.country, r.resource_type, r.location, r.address, r.source_publication
         FROM resources r
         LEFT JOIN publications p
         ON r.volume = p.volume AND r.issue = p.issue_number
         WHERE r.resource_type = 'Courses'
     ''')
-    courses = cursor.fetchall()
 
-    # Move each row into the 'events' table
-    for course in courses:
-        resource_title = course[0] or 'NA'
-        description = course[1] or 'NA'
-        city = course[2] or 'NA'
-        state = course[3] or 'NA'
-        country = course[4] or 'NA'
-        event_type = course[5] or 'NA'
-        publication_id = course[6]  # This will be NULL if no match is found
-        event_date = 'NA-NA-NA'  # Default date
-
-        cursor.execute('''
-            INSERT INTO events (event_title, description, publication_id, event_date, city, state, country, event_type)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (resource_title, description, publication_id, event_date, city, state, country, event_type))
-    
-    # Delete the moved rows from the 'resources' table
+    # Delete the moved rows from the resources table
     cursor.execute('''
         DELETE FROM resources
         WHERE resource_type = 'Courses'
@@ -124,3 +108,34 @@ if __name__ == '__main__':
     recreate_resources_table()
     import_csv_to_resources()
     move_courses_to_events()
+
+# fix to NULL values still sitting in events table
+#-----------------------------------------------------------------------------------------
+
+import sqlite3
+
+# Path to the SQLite database
+DB_PATH = 'zines.db'
+
+def delete_events():
+    """
+    Delete rows with event_id between 235 and 288 (inclusive) from the 'events' table.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    try:
+        # Delete rows with event_id between 235 and 288
+        cursor.execute('''
+            DELETE FROM events
+            WHERE event_id BETWEEN 235 AND 288
+        ''')
+        conn.commit()
+        print("Events with event_id between 235 and 288 have been deleted successfully.")
+    except sqlite3.Error as e:
+        print(f"Error while deleting events: {e}")
+    finally:
+        conn.close()
+
+if __name__ == '__main__':
+    delete_events()
