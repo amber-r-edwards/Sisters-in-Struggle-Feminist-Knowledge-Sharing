@@ -125,4 +125,4 @@ def calculate_source_publication_ratio():
 if __name__ == "__main__":
     calculate_source_publication_ratio()
 
-#86/264 OR 32.58%
+#92/308 - 29.87%
