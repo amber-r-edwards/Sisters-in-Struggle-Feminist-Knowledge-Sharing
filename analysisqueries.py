@@ -71,6 +71,94 @@ def analyze_publications_and_events():
 if __name__ == "__main__":
     analyze_publications_and_events()
 
+
+
+# ----------------------------------------------------------------------------------------------
+import sqlite3
+
+# Define the path to the SQLite database
+DB_PATH = 'zines.db'  # Replace with the actual path to your database
+
+def rank_source_publications():
+    """
+    Count and rank the instances of each source_publication from most to least frequent.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    try:
+        # Execute the query
+        query = '''
+            SELECT 
+                source_publication, 
+                COUNT(*) AS count
+            FROM events
+            WHERE source_publication IS NOT NULL AND source_publication != 'NA'
+            GROUP BY source_publication
+            ORDER BY count DESC;
+        '''
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        # Print the results
+        print("=== Source Publication Rankings ===")
+        print(f"{'Source Publication':<30} {'Count':<10}")
+        print("-" * 40)
+        for row in results:
+            print(f"{row[0]:<30} {row[1]:<10}")
+    except sqlite3.Error as e:
+        print(f"❌ Query execution error: {e}")
+    finally:
+        conn.close()
+        print("\n✓ Database connection closed.")
+
+# Run the function
+if __name__ == "__main__":
+    rank_source_publications()
+
+#RESULTS:
+#LNS                            17        
+#"SUE, I.A.M.B. Reporter"       11        
+#"Joan-Women's Liberation One, L.A." 8         
+#The Militant                   6         
+#San Francisco Chronicle        4         
+#Twin Cities Female Liberation Newsletter 3         
+#Margot                         3         
+#The Old Mole                   2         
+#Philadelphia W.L. Newsletter   2         
+#Pedestal                       2         
+#Marijean Suelzle               2         
+#Linda-New York Correspondent   2         
+#Alison - WFF                   2         
+#sister passin' thru            1         
+#Women's Liberation Coalition of Michigan Newsletter 1         
+#Su Negrin                      1         
+#SUSAN                          1         
+#Richmond Freedom News          1         
+#OWL Newsletter                 1         
+#NOW Newsletter-Berkeley        1         
+#N.O.W.                         1         
+#LNS,The Old Mole               1         
+#L.A. Women's Center Newsletter 1         
+#Kay - W.F.F                    1         
+#Helix                          1         
+#Guardian                       1         
+#Great Speckeled Bird           1         
+#G.H.F. Gardner                 1         
+#Fujin-Kaiho -- Anne Eakes      1         
+#Female Liberation News #15     1         
+#Everywoman L.A.                1         
+#Chicago Women's Liberation Union Newsletter 1         
+#Berkeley Barb                  1         
+#Agressa                        1         
+#ALTA                           1         
+#"The Underground Woman, St. Louis" 1         
+#"Susy, I.A.M.B Reporter"       1         
+#"Peggy, I.A.M.B. Reporter"     1         
+#"Female Liberation News Letter, Minn." 1         
+#"Felicity Todd, Socialist Woman, England" 1         
+#"CYNTHIA, I.A.M.B Reporter"    1   
+
 #-----------------------------------------------------------------------------------------------
 import sqlite3
 
@@ -125,4 +213,6 @@ def calculate_source_publication_ratio():
 if __name__ == "__main__":
     calculate_source_publication_ratio()
 
-#92/308 - 29.87%
+#RESULTS: 92/308 - 29.87%
+
+
